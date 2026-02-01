@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: smargaro <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: smargaro <smargaro@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/14 00:43:23 by smargaro          #+#    #+#             */
-/*   Updated: 2026/01/27 11:35:02 by smargaro         ###   ########.fr       */
+/*   Updated: 2026/02/01 17:21:57 by smargaro         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,26 +26,22 @@ void	salvataggio(char **memory, char *temp, ssize_t fine_lettura)
 
 char	*ft_substr(char const *s, unsigned int start, size_t len)
 {
-	char	*p;
-	size_t	i;
+	char				*p;
+	unsigned int		stl;
 
+	stl = ft_strlen(s);
 	if (!s)
 		return (NULL);
-	if (start >= ft_strlen(s))
+	if (start >= stl)
 	{
 		return (ft_calloc (1, 1));
 	}
-	i = 0;
-	if (len > ft_strlen(s) - start)
-		len = ft_strlen(s) - start;
+	if (len > stl - start)
+		len = stl - start;
 	p = (char *)ft_calloc(len + 1, sizeof(char));
 	if (p == NULL)
 		return (NULL);
-	while (i < len && s[start + i])
-	{
-		p[i] = s[start + i];
-		i++;
-	}
+	memcpy (p, s + start, len);
 	return (p);
 }
 
@@ -64,7 +60,7 @@ char	*estrazione_aggio(char **memory)
 		r = ft_substr(*memory, 0, i + 1);
 	else
 		r = ft_substr(*memory, 0, i);
-	if (!r)
+	if (!r )
 		return (NULL);
 	temp = ft_substr (*memory, ft_strlen(r), ft_strlen(*memory) - ft_strlen(r));
 	if (*memory)
@@ -78,9 +74,15 @@ char	*estrazione_aggio(char **memory)
 	return (r);
 }
 
+void	liberamem(char **memory)
+{
+	free (*memory);
+	*memory = NULL;
+}
+
 char	*get_next_line(int fd)
 {
-	char			temp[BUFFER_SIZE + 1];
+	char			*temp;
 	ssize_t			fine_lettura;
 	static char		*memory;
 	char			*r;
@@ -88,6 +90,7 @@ char	*get_next_line(int fd)
 	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
 	r = NULL;
+	temp = (char *)calloc(BUFFER_SIZE + 1, 1);
 	fine_lettura = read(fd, temp, BUFFER_SIZE);
 	while (fine_lettura > 0)
 	{
@@ -96,18 +99,16 @@ char	*get_next_line(int fd)
 			break ;
 		fine_lettura = read(fd, temp, BUFFER_SIZE);
 	}
+	free (temp);
 	if (fine_lettura < 0)
-	{
-		free (memory);
-		memory = NULL;
-	}
+		liberamem (&memory);
 	r = estrazione_aggio (&memory);
 	if (r && *r)
 		return (r);
 	return (NULL);
 }
 
-/*int	main(void)
+int	main(void)
 {
 	int		fd;
 	char	*line;
@@ -124,7 +125,7 @@ char	*get_next_line(int fd)
 
 	close(fd);
 	return (0);
-}*/
+}
 
 /*int	main(void)
 {
